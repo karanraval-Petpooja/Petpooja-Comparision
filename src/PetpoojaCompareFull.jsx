@@ -1079,7 +1079,7 @@ function Login({ onAuthed }) {
       <div className="pc-brandpanel pc-authbg" style={{ position: "relative", background: `linear-gradient(155deg, ${C.redDark} 0%, ${C.red} 55%, #ff6f60 100%)`, color: "#fff", padding: "56px", display: "flex", flexDirection: "column", justifyContent: "space-between", overflow: "hidden" }}>
         <div className="pc-float" style={{ position: "absolute", width: 420, height: 420, borderRadius: "50%", background: "rgba(255,255,255,.10)", top: -120, right: -120 }} />
         <div className="pc-float2" style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,.08)", bottom: -100, left: -60 }} />
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}><div style={{ background: "rgba(255,255,255,.16)", borderRadius: 12, padding: "8px 10px", display: "flex" }}><Logo size={30} light /></div><span style={{ fontWeight: 800, fontSize: 19 }}>Compare</span></div>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}><div style={{ background: "#fff", borderRadius: 12, padding: "8px 10px", display: "flex" }}><Logo size={30} /></div><span style={{ fontWeight: 800, fontSize: 19 }}>Compare</span></div>
         <div style={{ position: "relative" }}>
           <h1 style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.15, letterSpacing: "-.02em", margin: "0 0 14px" }}>Win the deal with a clear, honest comparison.</h1>
           <p style={{ fontSize: 15.5, color: "rgba(255,255,255,.9)", margin: "0 0 26px", maxWidth: 380 }}>Pricing, features, hardware and advantages for every Petpooja product vs the competition - in one place.</p>
