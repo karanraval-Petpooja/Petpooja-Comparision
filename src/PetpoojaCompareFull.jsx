@@ -1,3 +1,4 @@
+import { supabase } from "./lib/supabase";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search, ChevronDown, ChevronRight, Menu, X, Check, Minus, Info, ArrowRight,
@@ -1038,12 +1039,53 @@ const store = {
 };
 const auth = {
   async signIn(email, password) {
-    await wait(400);
     const em = email.trim().toLowerCase();
-    if (!store.isAllowed(em)) return { ok: false, error: "This email isn't enabled for login. Please contact " + CONTACT };
-    if (password !== genPassword(em)) return { ok: false, error: "Incorrect password. Please contact " + CONTACT };
-    store.logOpen(em);
-    return { ok: true, admin: store.isAdmin(em) };
+
+    if (!em || !password) {
+      return {
+        ok: false,
+        error: "Please enter email and password.",
+      };
+    }
+
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: em,
+        password,
+      });
+
+    if (error) {
+      return {
+        ok: false,
+        error: error.message,
+      };
+    }
+
+    const user = data.user;
+
+    await supabase
+      .from("profiles")
+      .upsert({
+        id: user.id,
+        email: user.email,
+        last_login_at: new Date().toISOString(),
+      });
+
+    return {
+      ok: true,
+      admin: false,
+      user,
+    };
+  },
+
+  async signOut() {
+    await supabase.auth.signOut();
+  },
+
+  async getSession() {
+    const { data } = await supabase.auth.getSession();
+
+    return data.session;
   },
 };
 const AUTH_CSS = `
@@ -1175,9 +1217,14 @@ function LoggedInBar({ user, logout, onAdmin }) {
   </div>;
 }
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("pc_user") || "null"); } catch { return null; }
+  });
   const [view, setView] = useState("dashboard");
-  if (!user) return <Login onAuthed={(u) => { setUser(u); setView("dashboard"); }} />;
-  if (view === "admin" && user.admin) return <Admin user={user} logout={() => setUser(null)} onBack={() => setView("dashboard")} />;
-  return <><LoggedInBar user={user} logout={() => setUser(null)} onAdmin={user.admin ? () => setView("admin") : null} /><CompareApp /></>;
+  const isAdmin = user && (user.role === "admin" || user.role === "superadmin");
+  const login = (u) => { try { localStorage.setItem("pc_user", JSON.stringify(u)); } catch { } setUser(u); setView("dashboard"); };
+  const logout = () => { try { localStorage.removeItem("pc_user"); } catch { } setUser(null); };
+  if (!user) return <Login onAuthed={login} />;
+  if (view === "admin" && isAdmin) return <Admin user={user} logout={logout} onBack={() => setView("dashboard")} />;
+  return <><LoggedInBar user={user} logout={logout} onAdmin={isAdmin ? () => setView("admin") : null} /><CompareApp /></>;
 }
