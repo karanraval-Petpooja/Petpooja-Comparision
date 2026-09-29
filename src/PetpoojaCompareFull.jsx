@@ -1,9 +1,8 @@
-import { supabase } from "./lib/supabase";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search, ChevronDown, ChevronRight, Menu, X, Check, Minus, Info, ArrowRight,
   ShoppingCart, Megaphone, Users, FileText, Cpu, IndianRupee, Layers, ShieldCheck,
-  Share2, Printer, Sparkles, Scale, BadgeCheck, Store, Zap, Settings, RotateCcw, CreditCard, Mail, Loader2, LogOut, UserPlus, Trash2, Activity, Lock, Copy, KeyRound
+  Share2, Printer, Sparkles, Scale, BadgeCheck, Store, Zap, Settings, RotateCcw, CreditCard, Mail, Loader2, LogOut, UserPlus, Trash2, Activity, Lock, Copy, Crown
 } from "lucide-react";
 
 /* ============================================================================
@@ -42,7 +41,7 @@ const GROUPS = {
     { key: "inventory", title: "Inventory", rows: [["inventory", "Inventory Management"], ["stockTracking", "Stock Tracking"], ["purchaseMgmt", "Purchase Management"], ["recipeMgmt", "Recipe Management"], ["wastage", "Wastage Tracking"]] },
     { key: "integrations", title: "Integrations", rows: [["swiggy", "Swiggy"], ["zomato", "Zomato"], ["paymentGateway", "Payment Gateway"], ["qrOrdering", "QR Ordering"], ["accounting", "Accounting"]] },
     { key: "reporting", title: "Reporting", rows: [["salesReports", "Sales Reports"], ["outletReports", "Outlet Reports"], ["inventoryReports", "Inventory Reports"], ["staffReports", "Staff Reports"]] },
-    { key: "plus", title: "Petpooja Plus (why we win)", rows: [["captainApp", "Captain App"], ["kds", "Kitchen Display (KDS)"], ["waiterCall", "Waiter Calling Device"], ["trm", "Table Reservation Manager"], ["digitalDisplay", "Digital Display"], ["myWebsite", "My Website (own ordering)"], ["reconciliation", "Order Reconciliation"], ["virtualWallet", "Virtual Wallet"], ["purchaseManager", "Purchase Manager (price compare)"], ["wabaMarketing", "WABA Marketing & e-Bills"]] },
+    { key: "plus", title: "Petpooja Plus (why we win)", rows: [["purchaseByPetpooja", "Purchase by Petpooja (FREE - snap image, auto inventory)"], ["captainApp", "Captain App"], ["kds", "Kitchen Display (KDS)"], ["waiterCall", "Waiter Calling Device"], ["trm", "Table Reservation Manager"], ["digitalDisplay", "Digital Display"], ["myWebsite", "My Website (own ordering)"], ["reconciliation", "Order Reconciliation"], ["virtualWallet", "Virtual Wallet"], ["purchaseManager", "Purchase Manager (price compare)"], ["wabaMarketing", "WABA Marketing & e-Bills"]] },
   ],
   marketing: [
     { key: "acquire", title: "Acquire New Customers", rows: [["influencerMeta", "Influencer + Meta"], ["meta", "Meta Ads"], ["snapchat", "Snapchat"], ["whatsappMkt", "WhatsApp"]] },
@@ -56,12 +55,18 @@ const GROUPS = {
     { key: "leave", title: "Leave", rows: [["leaveMgmt", "Leave Management"], ["leavePolicies", "Leave Policies"], ["leaveApproval", "Leave Approval"], ["leaveBalance", "Leave Balance"], ["leaveEncashment", "Leave Encashment"]] },
     { key: "compliance", title: "Compliance", rows: [["pf", "PF"], ["esic", "ESIC"], ["pt", "Professional Tax"], ["tds", "TDS"], ["form16", "Form 16"], ["statutoryReports", "Statutory Reports"]] },
     { key: "employee", title: "Employee", rows: [["ess", "Employee Self Service"], ["empApp", "Employee App"], ["regularization", "Regularization"], ["leaveRequests", "Leave Requests"], ["slipAccess", "Salary Slip Access"]] },
+    { key: "extras", title: "Petpooja Attendo extras (why we win)", rows: [["announcement", "Announcement broadcast"], ["bgVerification", "Background verification"], ["geoTracking", "Geo-tracking (live)"], ["mediclaimAddon", "Mediclaim add-on"]] },
+  ],
+  localpos: [
+    { key: "arch", title: "Local-First Architecture", rows: [["localData", "Data stays on your hardware"], ["merchantControl", "Merchant-owned data"], ["bridgeServer", "Bridge Server (on-prem)"], ["offline5day", "Offline billing up to 5 days"], ["cloudSync", "Cloud sync (menu + online orders)"]] },
+    { key: "billingops", title: "Billing & Operations", rows: [["posBilling", "POS Billing"], ["kot", "KOT"], ["menuMgmt", "Menu Management"], ["tableMgmt", "Table Management"], ["multiOutlet", "Multi-outlet (to 50+)"], ["offlineInventory", "Offline Inventory"]] },
+    { key: "supported", title: "Supported Services", rows: [["onlineOrdering", "Online Ordering"], ["captainApp", "Captain App"], ["kds", "KDS"], ["kiosk", "Kiosk"], ["trm", "Table Reservation (TRM)"], ["myWebsite", "MyWebsite"], ["qrOrder", "Pickup / Dine-in QR"], ["reeloLoyalty", "Reelo Loyalty"], ["paytmQr", "Paytm Static QR"], ["edcDevices", "EDC Devices"]] },
   ],
   invoice: [
-    { key: "billing", title: "Billing", rows: [["invoiceCreation", "Invoice Creation"], ["gstInvoice", "GST Invoice"], ["eInvoice", "E-Invoice"], ["creditNote", "Credit / Debit Note"], ["recurringInvoice", "Recurring Invoice"], ["whatsappEbill", "WhatsApp E-Bill"]] },
+    { key: "billing", title: "Billing", rows: [["invoiceCreation", "Invoice Creation"], ["gstInvoice", "GST Invoice"], ["eInvoice", "E-Invoice"], ["creditNote", "Credit / Debit Note"], ["recurringInvoice", "Recurring Invoice"], ["whatsappEbill", "WhatsApp E-Bill"], ["whatsappOrdering", "WhatsApp Ordering (WABA catalogue)"]] },
     { key: "inventory", title: "Inventory & Operations", rows: [["productMgmt", "Product Management"], ["stock", "Stock & Inventory"], ["hoWarehouse", "HO / Warehouse"], ["multiUser", "Multi-User"], ["barcode", "Barcode"]] },
     { key: "payments", title: "Payments", rows: [["paymentTracking", "Payment Tracking"], ["reminders", "Payment Reminders"], ["onlinePayments", "Online Payments"], ["edc", "EDC / Card Machine"]] },
-    { key: "loyalty", title: "Customers & Loyalty", rows: [["customerMgmt", "Customer Management"], ["customerHistory", "Customer History"], ["loyalty", "Loyalty & Rewards"]] },
+    { key: "loyalty", title: "Customers & Loyalty", rows: [["customerMgmt", "Customer Management"], ["customerHistory", "Customer History"], ["partyMetafield", "Party Metafield (custom fields)"], ["loyalty", "Loyalty & Rewards"]] },
     { key: "integrations", title: "Integrations", rows: [["tallyIntg", "Tally Integration"], ["shopify", "Shopify"], ["websiteIntg", "Website Integration"]] },
     { key: "ai", title: "Advanced / AI", rows: [["purchaseAI", "Purchase AI"], ["autoPurchase", "Auto Purchase entry (Purchase by Petpooja)"], ["aiTryOn", "AI Try-On (clothing)"], ["aiTheft", "AI Theft Detection"], ["adsr", "ADSR"], ["aiInsights", "AI Insights"]] },
     { key: "reports", title: "Reports", rows: [["salesReports", "Sales Reports"], ["gstReports", "GST Reports"], ["outstandingReports", "Outstanding Reports"]] },
@@ -70,6 +75,7 @@ const GROUPS = {
 const HW_GROUPS = {
   pos: [["posTerminal", "POS Terminal"], ["printer", "Bill Printer"], ["kotPrinter", "KOT Printer"], ["barcodeScanner", "Barcode Scanner"], ["cashDrawer", "Cash Drawer"], ["customerDisplay", "Customer Display"], ["kitchenDisplay", "Kitchen Display (KDS)"], ["paymentDevice", "Payment Device"], ["installation", "Installation"]],
   attendo: [["biometricDevice", "Biometric Device"], ["fingerprint", "Fingerprint"], ["faceDevice", "Face Recognition"], ["rfid", "RFID"], ["nfc", "NFC"], ["offlinePunch", "Offline Punch"], ["realtimeSync", "Real-time Sync"], ["installation", "Installation"]],
+  localpos: [["posTerminal", "POS Terminal"], ["printer", "Bill Printer"], ["kotPrinter", "KOT Printer"], ["barcodeScanner", "Barcode Scanner"], ["cashDrawer", "Cash Drawer"], ["customerDisplay", "Customer Display"], ["kitchenDisplay", "Kitchen Display (KDS)"], ["paymentDevice", "Payment Device"], ["installation", "Installation"]],
 };
 const featureIds = (prod) => GROUPS[prod].flatMap((g) => g.rows.map((r) => r[0]));
 const fill = (prod, base, overrides = {}) => {
@@ -97,11 +103,11 @@ const attendoPetpooja = {
       { id: "plus-advance", name: "Attendo Plus Advance (+Task)", y1: 14000, y3: null, renewal: 7000, renewalLabel: "AMC / year", note: "Biometric + screen + Task." },
       { id: "face-advance", name: "Attendo Face Advance (+Task)", y1: 18000, y3: null, renewal: 7000, renewalLabel: "AMC / year", note: "Face device + Task." },
     ],
-    addon: "Add-ons: Geo tracking ₹1,000 + GST / emp / yr · Mediclaim ₹1,300 + GST / emp / yr",
+    addon: "Add-ons (per employee, +18% GST): Geo tracking ₹1,000 (₹1,180)/yr · Mediclaim ₹1,300/yr · Background verification ₹200 (₹236) one-time. Announcement broadcast included free.",
   },
   features: fill("attendo", Y, { performanceMgmt: N }),
   hardware: { biometricDevice: Y, fingerprint: Y, faceDevice: Y, rfid: Y, nfc: Y, offlinePunch: Y, realtimeSync: Y, installation: Y, warranty: "Included" },
-  advantages: ["Device included in the plan", "Simple flat annual pricing — no per-employee fee", "Attendance + payroll in one", "Biometric, face, RFID & geo-fencing built in"],
+  advantages: ["Announcement broadcast + Background verification built in — competitors mostly don't offer these", "Geo-tracking add-on (₹1,000 + GST) — we run it, no manual field tracking", "Device included · no per-employee software fee", "Attendance + payroll + compliance in one; biometric, face, RFID & geo-fencing"],
   sources: [{ name: "Petpooja Attendo", url: "https://www.petpooja.com/", date: "Aug 2026" }],
 };
 const attendoComps = {
@@ -115,7 +121,33 @@ const attendoComps = {
 };
 
 /* ---------- POS ---------- */
-const posDefault = fill("pos", Y, { recipeMgmt: P, wastage: P, accounting: P, captainApp: P, kds: P, waiterCall: N, trm: P, digitalDisplay: N, myWebsite: P, reconciliation: N, virtualWallet: P, purchaseManager: N, wabaMarketing: P });
+const posDefault = fill("pos", Y, { purchaseByPetpooja: N, recipeMgmt: P, wastage: P, accounting: P, captainApp: P, kds: P, waiterCall: N, trm: P, digitalDisplay: N, myWebsite: P, reconciliation: N, virtualWallet: P, purchaseManager: N, wabaMarketing: P });
+const localposPetpooja = {
+  pricing: {
+    headline: "Local POS Basic ₹15,000 → Scale ₹30,000 + GST", model: "POS + MP Services tiers (Basic / Growth / Scale) + Standalone", billing: "Annual (per outlet)", perUnit: "Per outlet", hardware: "Bridge Server (merchant-owned) + POS peripherals", setup: "Bridge Server install + outlet mapping", geo: "-",
+    note: "Runs on your own Bridge Server (dedicated PC i5/8GB/1TB SSD up to 25 outlets, static IP + port 7000). Prices exclude GST.",
+    plans: [
+      { id: "basic", name: "Local POS Basic", def: true, y1: 15000, y3: null, renewal: 10000, renewalLabel: "Renewal / year", note: "POS + Food Aggregator Integration. ₹15,000 + GST (₹17,700) yr 1 · ₹10,000 renewal. Local-first, offline up to 5 days." },
+      { id: "growth", name: "Local POS + Growth", y1: 22000, y3: null, renewal: 18000, renewalLabel: "Renewal / year", note: "POS + choose any 5 services from MP Services. ₹22,000 + GST (₹25,960) yr 1 · ₹18,000 renewal." },
+      { id: "scale", name: "Local POS + Scale", badge: "All services", y1: 30000, y3: null, renewal: 25000, renewalLabel: "Renewal / year", note: "POS + ALL MP Services (Captain, KDS, Kiosk, TRM, MyWebsite, QR, Reelo, EDC & more). ₹30,000 + GST (₹35,400) yr 1 · ₹25,000 renewal." },
+      { id: "sa-growth", name: "Local Standalone Growth", y1: 10000, y3: null, renewal: 10000, renewalLabel: "Renewal / year", note: "Choose any 5 MP Services (standalone, no POS). ₹10,000 + GST (₹11,800)." },
+      { id: "sa-scale", name: "Local Standalone Scale", y1: 20000, y3: null, renewal: 20000, renewalLabel: "Renewal / year", note: "All MP Services (standalone, no POS). ₹20,000 + GST (₹23,600)." },
+    ],
+  },
+  features: fill("localpos", Y, { eBill: N, tallySap: N, petpoojaLoyalty: N, invConsumption: N, reconciliation: N, internetKot: N }),
+  hardware: { posTerminal: Y, printer: Y, kotPrinter: Y, barcodeScanner: Y, cashDrawer: Y, customerDisplay: Y, kitchenDisplay: Y, paymentDevice: Y, installation: Y, warranty: "Bridge Server on merchant hardware" },
+  advantages: ["Local-first - data stays on YOUR hardware, you own it (no shared cloud)", "Offline billing up to 5 days - keeps running if internet/Bridge Server drops", "Scales single outlet to 50+ with Captain, KDS, Kiosk, TRM, MyWebsite, EDC", "Cloud only syncs menu updates & online orders - full merchant control"],
+  sources: [{ name: "Petpooja", url: "https://www.petpooja.com/", date: "Sep 2026" }],
+};
+const localposDefault = fill("localpos", Y, { localData: N, merchantControl: N, bridgeServer: N, offline5day: P, reeloLoyalty: P, kiosk: P, trm: P, offlineInventory: P, eBill: Y, tallySap: Y, petpoojaLoyalty: N, invConsumption: Y, reconciliation: Y, internetKot: Y });
+const localposComp = (name, tagline, url, over = {}) => ({ name, tagline, pricing: { headline: "Cloud POS (custom pricing)", model: "Cloud-hosted (no on-prem local-first)", billing: "Custom", perUnit: "Per outlet", hardware: "Cloud + peripherals", setup: "Varies", geo: "-", custom: true, calc: () => null }, features: { ...localposDefault, ...over }, hardware: { posTerminal: P, printer: Y, kotPrinter: Y, barcodeScanner: P, cashDrawer: P, customerDisplay: P, kitchenDisplay: P, paymentDevice: P, installation: P, warranty: "Cloud" }, advantages: ["Cloud-hosted restaurant POS"], sources: [{ name, url, date: "Sep 2026" }] });
+const localposComps = {
+  restroworks: localposComp("Restroworks", "Enterprise cloud restaurant OS", "https://www.restroworks.com/", { multiOutlet: Y }),
+  rista: localposComp("Rista", "Cloud restaurant POS", "https://www.ristaapps.com/"),
+  tmbill: localposComp("TMBill", "Cloud POS + add-ons", "https://www.tmbill.com/"),
+  menson: localposComp("Menson POS", "Local / offline restaurant billing POS", "", { localData: P, offline5day: Y, merchantControl: P }),
+};
+
 const posPetpooja = {
   pricing: {
     headline: "Operation Core ₹12,000 + Manager tiers", model: "Operation Core (base) + Operation Manager add-on tiers", billing: "Annual (Ex tax)", perUnit: "Unlimited users & terminals", hardware: "Available (terminal, printers, KDS)", setup: "Installation & training included", geo: "—",
@@ -129,7 +161,7 @@ const posPetpooja = {
   },
   features: fill("pos", Y),
   hardware: { posTerminal: Y, printer: Y, kotPrinter: Y, barcodeScanner: Y, cashDrawer: Y, customerDisplay: Y, kitchenDisplay: Y, paymentDevice: Y, installation: Y, warranty: "As per plan" },
-  advantages: ["Purchase Manager — raw-material price comparison, direct ordering & auto inventory (beyond basic inventory)", "End-to-end marketing — WABA, branded e-Bills, feedback, loyalty & campaigns in one flow", "KDS, Captain App, Scan & Order & Waiter Calling — full front-to-kitchen coordination", "Table Reservation Manager (Swiggy Dineout / Zomato / District), Digital Display, My Website & Order Reconciliation", "Core includes inventory, 90+ reports & AI Agent · unlimited users & terminals"],
+  advantages: ["Purchase by Petpooja — FREE: snap a bill image and inventory updates automatically, no manual entry", "Purchase Manager — raw-material price comparison, direct ordering & auto inventory", "End-to-end marketing — WABA, branded e-Bills, feedback, loyalty & campaigns in one flow", "KDS, Captain App, Scan & Order & Waiter Calling — full front-to-kitchen coordination", "Table Reservation Manager (Swiggy Dineout / Zomato / District), Digital Display, My Website & Order Reconciliation", "Core includes inventory, 90+ reports & AI Agent · unlimited users & terminals"],
   sources: [{ name: "Petpooja", url: "https://www.petpooja.com/", date: "Sep 2026" }],
 };
 const posComp = (name, tagline, headline, over = {}, hw = {}, extra = {}) => ({
@@ -146,7 +178,7 @@ const posComps = {
   tmbill: posComp("TMBill", "Cloud POS + add-ons", "₹10,000 yr1 · ₹8,000 renewal", { recipeMgmt: Y, purchaseMgmt: Y, captainApp: Y, kds: Y, trm: Y, virtualWallet: Y, myWebsite: Y, purchaseManager: P }, {}, { adv: ["Unlimited devices & users on Core", "Rich paid add-on marketplace", "Inventory, recipe & purchase in Core"], url: "https://www.tmbill.com/", custom: false, model: "Per outlet, annual + add-ons" }),
   ezo: posComp("EZO", "Billing, POS & inventory app", "From low monthly (verify)", { tableMgmt: P, kot: P, recipeMgmt: N, wastage: N }, {}, { adv: ["Simple billing & inventory app", "Low entry cost"], url: "https://ezo.io/" }),
   rista: posComp("Rista", "Cloud POS + CRM bundle", "₹15,000–₹35,000 + GST / yr", { wabaMarketing: Y, virtualWallet: P }, {}, { adv: ["Discounted POS + CRM + WhatsApp bundle", "QR & online ordering", "Loyalty & customer insights"], url: "https://www.ristaapps.com/", custom: false, model: "Per outlet, annual (12 mo)" }),
-  dotpe: posComp("DotPe", "Ordering + POS", "Not publicly listed", { inventory: P, recipeMgmt: P, myWebsite: Y, wabaMarketing: P }, {}, { adv: ["QR ordering & digital storefront"], url: "https://dotpe.in/" }),
+  dineers: posComp("Dineers", "Restaurant POS & billing", "Not publicly listed", {}, {}, { adv: ["Restaurant billing & operations"], url: "" }),
 };
 
 /* ---------- MARKETING AUTOMATION ---------- */
@@ -176,24 +208,29 @@ const mktComps = {
   xeno: mktComp("Xeno", "Restaurant CRM & marketing", { waba: Y, loyaltyPts: Y }, ["Restaurant-specific CRM depth"], "https://xeno.in/"),
   limetray: mktComp("LimeTray", "Engagement & loyalty suite", { loyaltyPts: Y }, ["Broader restaurant tech suite"], "https://limetray.com/"),
   wateron: mktComp("WATConsult / others", "Generic CRM & campaigns", { feedback: P, reputation: P }, ["General-purpose campaigns"], ""),
+  reelo: { name: "Reelo", tagline: "Restaurant loyalty & marketing", pricing: { headline: "Free · Growth ₹3,250/outlet/mo", model: "Per-outlet, free tier + paid", billing: "Annual", perUnit: "₹3,250/outlet/mo (Growth)", hardware: "—", setup: "Low", geo: "—", custom: false, calc: () => 3250 }, features: fill("marketing", Y, { snapchat: N, influencerMeta: N, digitalDisplay: N, trm: N, meta: P, waba: Y, loyaltyPts: Y, feedback: Y, reputation: Y }), hardware: {}, advantages: ["Deep restaurant loyalty & membership programs", "Integrates with 35+ POS incl. Petpooja", "WhatsApp / SMS / email in one place"], sources: [{ name: "Reelo", url: "https://reelo.io/pricing/", date: "Sep 2026" }] },
 };
 
 /* ---------- INVOICE (NPU) ---------- */
 const invPetpooja = {
   pricing: {
-    headline: "Basic ₹6,000 · Advance ₹12,000 / yr", model: "Flat plan (Basic / Advance) · no per-user", billing: "Annual (1-yr & 3-yr)", perUnit: "None", hardware: "—", setup: "Low", geo: "—",
+    headline: "Basic ₹6,000 · Advance ₹12,000 / yr", model: "Flat plan (Basic / Advance) · no per-user", billing: "Annual (1-yr & 3-yr)", perUnit: "Per outlet", hardware: "—", setup: "Low", geo: "—",
     note: "Effective 1 Sep 2026. Prices exclude GST.",
     plans: [
       { id: "basic", name: "Basic", def: true, y1: 6000, y3: 10000, renewal: 3500, renewalLabel: "Renewal / year", note: "All core POS & business features — Billing, Inventory, Reporting, HO/Warehouse, Multi-User, WhatsApp E-Bills." },
       { id: "advance", name: "Advance", badge: "Most features", y1: 12000, y3: 16000, renewal: 5000, renewalLabel: "Renewal / year", note: "Everything in Basic + Purchase by Petpooja (supplier invoices sync automatically — no manual entry), Purchase AI, Shopify, Tally, Loyalty, Website Integration, EDC, ADSR, AI Try-On (clothing), AI Theft Detection, WhatsApp Messaging & upcoming integrations." },
     ],
+    plansAfter: [
+      { id: "basic", name: "Basic", def: true, y1: 6000, y3: 10000, renewal: 3500, renewalLabel: "Renewal / year", note: "Billing & POS, Multi-Counter / Multi-User, HO & Warehouse Management, Inventory, Reporting, Accounting features, Mobile B2C app, Weighing scale, Unlimited WhatsApp E-Bills via WABA. All core retail needs, no extra add-ons required." },
+      { id: "advance", name: "Advance", badge: "Complete", y1: 12000, y3: 16000, renewal: 5000, renewalLabel: "Renewal / year", note: "Everything in Basic + Purchase AI, Shopify, WhatsApp Messaging, Petpooja Loyalty, Tally, AI Try-On, Merchant Website, EDC Payment, Static QR (upcoming), ADSR, AI Theft Detection, WhatsApp Order (upcoming)." },
+    ],
   },
   features: fill("invoice", Y),
   hardware: {},
-  advantages: ["Purchase by Petpooja — supplier invoices update automatically, no manual entry", "AI Try-On (clothing) & AI Theft Detection — unique to Petpooja", "Flat pricing — no per-user / per-counter fees", "Advance adds Shopify, Tally, Loyalty, EDC, ADSR & Purchase AI"],
+  advantages: ["WhatsApp Ordering — sell via WABA catalogue: browse, order, pay & fulfil on WhatsApp, orders flow into Online Orders", "Party Metafield — custom text/single/multi-select fields on parties, Excel-managed, shown in ledger & reports", "Purchase by Petpooja — supplier invoices update automatically, no manual entry", "AI Try-On & AI Theft Detection + flat pricing (no per-user fees)"],
   sources: [{ name: "Petpooja Invoice", url: "https://www.petpooja.com/invoice", date: "Sep 2026" }],
 };
-const invOver = (o = {}) => ({ purchaseAI: N, autoPurchase: N, aiTryOn: N, aiTheft: N, adsr: N, aiInsights: N, whatsappEbill: P, hoWarehouse: P, shopify: P, websiteIntg: P, loyalty: P, edc: P, tallyIntg: P, barcode: Y, ...o });
+const invOver = (o = {}) => ({ purchaseAI: N, autoPurchase: N, aiTryOn: N, aiTheft: N, adsr: N, aiInsights: N, whatsappEbill: P, whatsappOrdering: N, partyMetafield: N, hoWarehouse: P, shopify: P, websiteIntg: P, loyalty: P, edc: P, tallyIntg: P, barcode: Y, ...o });
 const invC = (name, tagline, bestFor, headline, over, url, custom = true) => ({
   name, tagline, bestFor,
   pricing: { headline, model: custom ? "Custom / licence" : "Per-plan", billing: custom ? "Custom" : "Annual", perUnit: custom ? "Not publicly listed" : "Varies", hardware: "—", setup: "Varies", geo: "—", custom },
@@ -261,17 +298,24 @@ const INVOICE_INTEGRATIONS = {
     { name: "Pine Labs Android POS", desc: "Android POS on Pine Labs terminals — one device for billing & payments.", badge: "Newly Launched" },
     { name: "PhonePe Dynamic QR", desc: "Seamless UPI payments with automatic payment sync." },
   ],
+  marketing: [
+    { name: "WhatsApp Marketing", desc: "Send offers and updates to customers on WhatsApp.", price: "₹2,500 + taxes / yr", badge: "Newly Launched" },
+    { name: "Petpooja Loyalty", desc: "Reward customers with points, discounts and cashback.", price: "Free", badge: "Newly Launched" },
+    { name: "BillFree Integration", desc: "Sync customer data with BillFree to automate loyalty earn & redeem.", price: "₹2,500 + taxes / yr", badge: "Coming Soon" },
+    { name: "Reelo", desc: "Sync customer data with Reelo to automate loyalty earn & redeem.", price: "₹2,500 + taxes / yr" },
+  ],
   extra: { name: "Tally Integration — 1 Year", desc: "Sync invoices & accounting with Tally.", price: "₹2,500 + taxes" },
 };
 
 /* ---------- PRODUCT REGISTRY ---------- */
 const PRODUCTS = {
   pos: { name: "POS", cat: ["ppu"], Icon: ShoppingCart, desc: "Complete restaurant POS, billing and operations management.", caps: ["Billing & KOT", "Inventory", "Aggregator integrations"], hardware: true, groups: "pos", petpooja: posPetpooja, comps: posComps, calcInputs: [["outlets", "Outlets", 1], ["terminals", "Terminals", 1]], perOutlet: true },
-  marketing: { name: "Marketing Automation", cat: ["ppu"], Icon: Megaphone, desc: "Engage customers, automate marketing and drive repeat business.", caps: ["WhatsApp & SMS", "Loyalty", "Automation"], hardware: false, groups: "marketing", petpooja: mktPetpooja, comps: mktComps, calcInputs: [["customers", "Customers (000s)", 5]] },
-  attendo: { name: "Attendo", cat: ["ppu", "npu"], Icon: Users, desc: "Attendance, payroll and workforce management.", caps: ["Payroll", "Biometric attendance", "Compliance"], hardware: true, groups: "attendo", petpooja: attendoPetpooja, comps: attendoComps, calcInputs: [["employees", "Employees", 50]], perUnitCalc: "employees" },
-  invoice: { name: "Invoice", cat: ["npu"], Icon: FileText, desc: "Simple invoicing and GST billing for growing businesses.", caps: ["GST invoice", "E-invoice", "Payments"], hardware: false, groups: "invoice", petpooja: invPetpooja, comps: invComps, calcInputs: [["users", "Users", 3]], perUnitCalc: "users", integrations: INVOICE_INTEGRATIONS },
+  "local-pos": { name: "Local POS", cat: ["ppu"], Icon: Store, desc: "Local-first POS - all data on your own Bridge Server, offline up to 5 days.", caps: ["Local-first / on-prem", "Offline up to 5 days", "Merchant-owned data"], hardware: true, groups: "localpos", petpooja: localposPetpooja, comps: localposComps, calcInputs: [["outlets", "Outlets", 1]], perOutlet: true },
+  marketing: { name: "Marketing Automation", cat: ["ppu"], Icon: Megaphone, desc: "Engage customers, automate marketing and drive repeat business.", caps: ["WhatsApp & SMS", "Loyalty", "Automation"], hardware: false, groups: "marketing", petpooja: mktPetpooja, comps: mktComps, calcInputs: [["outlets", "Outlets", 1]], perOutlet: true },
+  attendo: { name: "Attendo", cat: ["ppu", "npu"], Icon: Users, desc: "Attendance, payroll and workforce management.", caps: ["Payroll", "Biometric attendance", "Compliance"], hardware: true, groups: "attendo", petpooja: attendoPetpooja, comps: attendoComps, calcInputs: [["employees", "Employees", 50]], perUnitCalc: "employees", addons: [{ id: "geo", label: "Geo tracking", per: "year", amt: 1000 }, { id: "mediclaim", label: "Mediclaim", per: "year", amt: 1300 }, { id: "bgv", label: "Background verification", per: "once", amt: 200 }] },
+  invoice: { name: "Invoice", cat: ["npu"], Icon: FileText, desc: "Simple invoicing and GST billing for growing businesses.", caps: ["GST invoice", "E-invoice", "Payments"], hardware: false, groups: "invoice", petpooja: invPetpooja, comps: invComps, calcInputs: [["outlets", "Outlets", 1]], perOutlet: true, integrations: INVOICE_INTEGRATIONS },
 };
-const CATS = { ppu: ["pos", "marketing", "attendo"], npu: ["invoice", "attendo"] };
+const CATS = { ppu: ["pos", "local-pos", "marketing", "attendo"], npu: ["invoice", "attendo"] };
 
 /* ---------- COMPETITOR PLAN TIERS (Attendo / POS / Marketing) ----------
    Real, published tiers where available; "Custom pricing / Not publicly
@@ -313,10 +357,10 @@ const ATTENDO_CPLANS = {
   ],
 };
 const POS_CPLANS = {
-  restroworks: [{ id: "basic", name: "Basic", def: true, price: "≈ ₹40,000 + GST / yr", note: "Cloud POS, billing, inventory management, CRM & customer segmentation, dedicated Zomato order server, after-sales support & training.", rate: () => Math.round(40000 / 12) }, { id: "enterprise", name: "Enterprise", price: "Custom quote", custom: true, note: "Multi-brand / large-chain, advanced analytics & integrations." }],
-  rista: [{ id: "pos", name: "Billing POS + QR", def: true, price: "₹15,000 + GST (₹17,700)", note: "POS billing, QR ordering, online ordering, 3rd-party integrations, discounts/charges/deals, business reports & analytics. 12 months.", rate: () => Math.round(15000 / 12) }, { id: "pos-crm", name: "POS + CRM & Loyalty", price: "₹25,000 + GST", note: "Everything in POS + CRM, loyalty program, engagement, retention & insights.", rate: () => Math.round(25000 / 12) }, { id: "bundle", name: "POS + CRM + WhatsApp", badge: "Special bundle", price: "₹35,000 + GST (₹41,300)", note: "Rista Billing POS + QR, CRM & Loyalty, WhatsApp Kickstarter (campaigns & notifications). 12 months, specially discounted.", rate: () => Math.round(35000 / 12) }],
-  dotpe: [{ id: "basic", name: "Basic", def: true, price: "Not publicly listed", custom: true, note: "Ordering + POS, QR menu." }, { id: "pro", name: "Pro", price: "Not publicly listed", custom: true, note: "+ storefront, payments, marketing." }],
-  tmbill: [{ id: "core", name: "Core (Most Popular)", def: true, price: "₹10,000 yr1 · ₹8,000 renewal", note: "Cloud POS (unlimited devices/users), billing & KOT, menu, table, discounts, anti-theft, CRM Hub, 24×7 support, customer display, owner app, virtual wallet, 100+ reports, inventory, vendors, recipe & purchase management, QR ordering, Zomato/Swiggy integration.", rate: () => Math.round(10000 / 12) }, { id: "plus", name: "Core + Plus add-ons", price: "₹10,000 + add-ons", note: "Add-ons (yearly): Captain App / KDS / Loyalty / Feedback / Call Centre / Table Reservation ₹3,000 each · UPI ₹4,000 · Accounting ₹10,000 · WhatsApp ₹10,000 · Website ₹10,000.", rate: () => Math.round(10000 / 12) }],
+  restroworks: [{ id: "basic", name: "Basic", def: true, price: "≈ ₹40,000 + GST / yr", note: "Cloud POS, billing, inventory management, CRM & customer segmentation, dedicated Zomato order server, after-sales support & training.", rate: () => Math.round(40000/12) }, { id: "enterprise", name: "Enterprise", price: "Custom quote", custom: true, note: "Multi-brand / large-chain, advanced analytics & integrations." }],
+  rista: [{ id: "pos", name: "Billing POS + QR", def: true, price: "₹15,000 + GST (₹17,700)", note: "POS billing, QR ordering, online ordering, 3rd-party integrations, discounts/charges/deals, business reports & analytics. 12 months.", rate: () => Math.round(15000/12) }, { id: "pos-crm", name: "POS + CRM & Loyalty", price: "₹25,000 + GST", note: "Everything in POS + CRM, loyalty program, engagement, retention & insights.", rate: () => Math.round(25000/12) }, { id: "bundle", name: "POS + CRM + WhatsApp", badge: "Special bundle", price: "₹35,000 + GST (₹41,300)", note: "Rista Billing POS + QR, CRM & Loyalty, WhatsApp Kickstarter (campaigns & notifications). 12 months, specially discounted.", rate: () => Math.round(35000/12) }],
+  dineers: [{ id: "standard", name: "Standard", def: true, price: "Not publicly listed", custom: true, note: "Restaurant POS & billing." }, { id: "premium", name: "Premium", price: "Not publicly listed", custom: true, note: "+ multi-outlet & integrations." }],
+  tmbill: [{ id: "core", name: "Core (Most Popular)", def: true, price: "₹10,000 yr1 · ₹8,000 renewal", note: "Cloud POS (unlimited devices/users), billing & KOT, menu, table, discounts, anti-theft, CRM Hub, 24×7 support, customer display, owner app, virtual wallet, 100+ reports, inventory, vendors, recipe & purchase management, QR ordering, Zomato/Swiggy integration.", rate: () => Math.round(10000/12) }, { id: "plus", name: "Core + Plus add-ons", price: "₹10,000 + add-ons", note: "Add-ons (yearly): Captain App / KDS / Loyalty / Feedback / Call Centre / Table Reservation ₹3,000 each · UPI ₹4,000 · Accounting ₹10,000 · WhatsApp ₹10,000 · Website ₹10,000.", rate: () => Math.round(10000/12) }],
   ezo: [{ id: "free", name: "Free", def: true, price: "Free", note: "Basic billing & inventory app.", rate: () => 0 }, { id: "premium", name: "Premium", price: "Paid (verify)", custom: true, note: "+ advanced billing, GST, reports." }],
   menson: [{ id: "standard", name: "Standard", def: true, price: "Not publicly listed", custom: true, note: "Restaurant billing & POS." }, { id: "plus", name: "Plus", price: "Not publicly listed", custom: true, note: "+ more outlets & modules." }],
 };
@@ -324,10 +368,12 @@ const MKT_CPLANS = {
   xeno: [{ id: "core", name: "Core", def: true, price: "Custom pricing", custom: true, note: "Restaurant CRM, campaigns, loyalty." }, { id: "growth", name: "Growth", price: "Custom pricing", custom: true, note: "+ advanced automation & analytics." }],
   limetray: [{ id: "core", name: "Core", def: true, price: "Custom pricing", custom: true, note: "Engagement & loyalty suite." }, { id: "growth", name: "Growth", price: "Custom pricing", custom: true, note: "+ broader restaurant tech modules." }],
   wateron: [{ id: "std", name: "Standard", def: true, price: "Custom pricing", custom: true, note: "General CRM & campaigns." }, { id: "pro", name: "Pro", price: "Custom pricing", custom: true, note: "+ automation & reporting." }],
+  reelo: [{ id: "free", name: "Free (Forever)", price: "Free", note: "SMS/email campaigns, customer insights, analytics, RFM segmentation.", rate: () => 0 }, { id: "growth", name: "Growth", def: true, price: "₹3,250 / outlet / mo (₹39,000/yr)", note: "Loyalty, membership, WhatsApp/SMS/email campaigns, feedback, reviews, automation. 14-day trial.", rate: () => 3250 }, { id: "pro", name: "Pro / Enterprise", price: "Custom", custom: true, note: "Higher volumes, multi-outlet chains, advanced features." }],
 };
 Object.keys(ATTENDO_CPLANS).forEach((k) => { if (attendoComps[k]) attendoComps[k].pricing.plans = ATTENDO_CPLANS[k]; });
 Object.keys(POS_CPLANS).forEach((k) => { if (posComps[k]) posComps[k].pricing.plans = POS_CPLANS[k]; });
 Object.keys(MKT_CPLANS).forEach((k) => { if (mktComps[k]) mktComps[k].pricing.plans = MKT_CPLANS[k]; });
+Object.keys(attendoComps).forEach((k) => { const ff = attendoComps[k].features; ff.announcement = (k === "keka" || k === "zoho-hr") ? Y : (k === "greythr" || k === "pagarbook") ? P : N; ff.bgVerification = N; ff.geoTracking = (k === "keka" || k === "zoho-hr" || k === "greythr" || k === "tankhapatra") ? P : N; ff.mediclaimAddon = N; });
 
 /* ============================================================================
    UI PRIMITIVES
@@ -567,12 +613,18 @@ function Calculator({ prod, comp, pName, ppPlan, compPlan }) {
   const key = prod.calcInputs[0][0];
   const [n, setN] = useState(prod.calcInputs[0][2]);
   const [period, setPeriod] = useState("annual");
+  const [addOn, setAddOn] = useState({});
+  const [addonEmp, setAddonEmp] = useState(50);
   const months = period === "monthly" ? 1 : period === "annual" ? 12 : 36;
   const legacy = (calc) => (calc ? (calc(n) == null ? null : calc(n) * months) : null);
   const mult = prod.perOutlet ? Math.max(1, n) : 1; // POS is priced per outlet
   const scale = (v) => (v == null ? null : v * mult);
   const pp = scale(ppPlan ? planCost(ppPlan, n, period) : legacy(prod.petpooja.pricing.calc));
   const cp = scale(compPlan ? planCost(compPlan, n, period) : legacy(comp.pricing.calc));
+  const anyAddon = (prod.addons || []).some((a) => addOn[a.id]);
+  const aEmp = Math.min(addonEmp, n);
+  const addonCost = (prod.addons || []).reduce((s, a) => addOn[a.id] ? s + (a.per === "once" ? a.amt * aEmp : (period === "monthly" ? Math.round(a.amt * aEmp / 12) : period === "annual" ? a.amt * aEmp : a.amt * aEmp * 3)) : s, 0);
+  const ppT = pp == null ? null : pp + addonCost;
   const label = (period === "monthly" ? "for 1 month" : period === "annual" ? "for 1 year" : "over 3 years") + (prod.perOutlet ? ` · ${mult} outlet${mult > 1 ? "s" : ""}` : "");
   return (
     <div style={{ background: C.dark, borderRadius: 24, padding: 28, color: "#fff", boxShadow: "0 20px 50px rgba(23,32,42,.28)" }}>
@@ -590,21 +642,22 @@ function Calculator({ prod, comp, pName, ppPlan, compPlan }) {
           </div>
         </div>
       </div>
+      {prod.addons && <div style={{ marginBottom: 18 }}><div style={{ fontSize: 12.5, color: "#B7C0CB", marginBottom: 8 }}>Optional add-ons (per employee, +GST):</div><div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{prod.addons.map((a) => { const on = !!addOn[a.id]; return <button key={a.id} onClick={() => setAddOn((o) => ({ ...o, [a.id]: !o[a.id] }))} style={{ border: `1.5px solid ${on ? C.red : "rgba(255,255,255,.22)"}`, background: on ? "rgba(229,57,53,.22)" : "transparent", color: "#fff", borderRadius: 999, padding: "7px 13px", fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}>{on ? "✓ " : "+ "}{a.label} <span style={{ color: "#B7C0CB", fontWeight: 500 }}>₹{a.amt}{a.per === "once" ? " once" : "/yr"}/emp</span></button>; })}</div>{anyAddon && (<div style={{ marginTop: 12, background: "rgba(255,255,255,.06)", borderRadius: 12, padding: "12px 14px" }}><div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9 }}><span style={{ fontSize: 13, color: "#B7C0CB" }}>Employees needing add-ons</span><span style={{ fontSize: 15, fontWeight: 800 }}>{aEmp} <span style={{ fontSize: 12, fontWeight: 500, color: "#7C8794" }}>of {n}</span></span></div><input type="range" min={1} max={n} step={1} value={aEmp} onChange={(e) => setAddonEmp(+e.target.value)} className="pc-range" style={{ width: "100%" }} /></div>)}</div>}
       <div className="pc-calc-out" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
         <div style={{ background: "rgba(229,57,53,.16)", border: "1px solid rgba(229,57,53,.4)", borderRadius: 16, padding: "16px 18px" }}>
           <div style={{ fontSize: 12.5, color: "#FFB4B0", fontWeight: 700 }}>Petpooja {pName}{ppPlan ? ` · ${ppPlan.name.split("(")[0].trim()}` : ""}</div>
-          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{pp == null ? "Custom" : inr(pp)}</div>
-          <div style={{ fontSize: 11.5, color: "#B7C0CB" }}>{pp == null ? "request a quote" : label}</div>
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{ppT == null ? "Custom" : inr(ppT)}</div>
+          <div style={{ fontSize: 11.5, color: "#B7C0CB" }}>{ppT == null ? "request a quote" : label}{addonCost ? " incl. add-ons" : ""}</div>
         </div>
         <div style={{ background: "rgba(255,255,255,.06)", borderRadius: 16, padding: "16px 18px" }}>
           <div style={{ fontSize: 12.5, color: "#B7C0CB", fontWeight: 700 }}>{comp.name}{compPlan ? ` · ${compPlan.name}` : ""}</div>
           <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{cp == null ? "Custom" : inr(cp)}</div>
           <div style={{ fontSize: 11.5, color: "#7C8794" }}>{cp == null ? "quote-based" : label}</div>
         </div>
-        <div style={{ background: pp != null && cp != null ? "rgba(18,183,106,.14)" : "rgba(255,255,255,.06)", border: pp != null && cp != null ? "1px solid rgba(18,183,106,.4)" : "none", borderRadius: 16, padding: "16px 18px" }}>
+        <div style={{ background: ppT != null && cp != null ? "rgba(18,183,106,.14)" : "rgba(255,255,255,.06)", border: ppT != null && cp != null ? "1px solid rgba(18,183,106,.4)" : "none", borderRadius: 16, padding: "16px 18px" }}>
           <div style={{ fontSize: 12.5, color: "#86E5B4", fontWeight: 700 }}>Difference</div>
-          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{pp == null || cp == null ? "—" : inr(Math.abs(cp - pp))}</div>
-          <div style={{ fontSize: 11.5, color: "#7C8794" }}>{pp == null || cp == null ? "not comparable" : label}</div>
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{ppT == null || cp == null ? "—" : inr(Math.abs(cp - ppT))}</div>
+          <div style={{ fontSize: 11.5, color: "#7C8794" }}>{ppT == null || cp == null ? "not comparable" : label}</div>
         </div>
       </div>
       <p style={{ fontSize: 11.5, color: "#7C8794", margin: "16px 0 0" }}>Estimated using published pricing where available. Excludes GST, setup and hardware. Not an official quotation.</p>
@@ -768,6 +821,21 @@ function Integrations({ data }) {
           </div>
         ))}
       </div>
+      {data.marketing && <>
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: C.muted, margin: "18px 0 10px" }}>Marketing & Loyalty add-ons (per year)</div>
+        <div className="pc-intgrid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12 }}>
+          {data.marketing.map((it) => (
+            <div key={it.name} className="pc-lift" style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
+                <span style={{ fontWeight: 800, color: C.dark, fontSize: 13.5 }}>{it.name}</span>
+                <span style={{ fontWeight: 800, color: it.price === "Free" ? C.green : C.red, fontSize: 13, whiteSpace: "nowrap" }}>{it.price}</span>
+              </div>
+              <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.45 }}>{it.desc}</div>
+              {it.badge && <span style={{ display: "inline-block", marginTop: 8, fontSize: 10, fontWeight: 700, color: it.badge === "Coming Soon" ? "#B8860B" : C.green, background: it.badge === "Coming Soon" ? "#FFF7E6" : "#EAF7F0", padding: "2px 8px", borderRadius: 999, textTransform: "uppercase", letterSpacing: ".03em" }}>{it.badge}</span>}
+            </div>
+          ))}
+        </div>
+      </>}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 12, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, padding: "14px 16px" }}>
         <div><div style={{ fontWeight: 800, color: C.dark, fontSize: 13.5 }}>{data.extra.name}</div><div style={{ fontSize: 12, color: C.muted }}>{data.extra.desc}</div></div>
         <span style={{ fontWeight: 800, color: C.red, fontSize: 14, whiteSpace: "nowrap" }}>{data.extra.price}</span>
@@ -779,9 +847,9 @@ function Integrations({ data }) {
 function Block({ children, id }) { return <section id={id} style={{ padding: "32px 20px" }}><div style={container}><Reveal>{children}</Reveal></div></section>; }
 function JumpNav({ prod }) {
   const links = [["pricing", "Pricing"], ["calculator", "Calculator"], ["features", "Features"],
-  ...(prod.hardware ? [["hardware", "Hardware"]] : []),
-  ...(prod.integrations ? [["integrations", "Integrations"]] : []),
-  ["advantages", "Where Petpooja stands out"], ["summary", "Summary"], ["sources", "Sources"]];
+    ...(prod.hardware ? [["hardware", "Hardware"]] : []),
+    ...(prod.integrations ? [["integrations", "Integrations"]] : []),
+    ["advantages", "Where Petpooja stands out"], ["summary", "Summary"], ["sources", "Sources"]];
   const [active, setActive] = useState(links[0][0]);
   const [ind, setInd] = useState({ left: 0, width: 0 });
   const btnRefs = useRef({});
@@ -806,11 +874,9 @@ function JumpNav({ prod }) {
         <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, color: C.muted, textTransform: "uppercase", letterSpacing: ".08em" }}>Jump to</span>
         <div className="pc-jumpscroll" style={{ position: "relative", display: "flex", gap: 4, overflowX: "auto", flex: 1 }}>
           <div style={{ position: "absolute", top: 0, bottom: 0, left: ind.left, width: ind.width, background: `linear-gradient(135deg, ${C.redDark}, ${C.red})`, borderRadius: 999, transition: "left .32s cubic-bezier(.22,1,.36,1), width .32s cubic-bezier(.22,1,.36,1)", boxShadow: "0 4px 14px rgba(229,57,53,.35)", pointerEvents: "none" }} />
-          {links.map(([id, l]) => {
-            const on = active === id; return (
-              <button key={id} ref={(el) => (btnRefs.current[id] = el)} onClick={() => go(id)} style={{ position: "relative", zIndex: 1, flexShrink: 0, border: "none", background: "transparent", color: on ? "#fff" : C.muted, fontSize: 13, fontWeight: 700, padding: "8px 15px", borderRadius: 999, cursor: "pointer", whiteSpace: "nowrap", transition: "color .2s" }}>{l}</button>
-            );
-          })}
+          {links.map(([id, l]) => { const on = active === id; return (
+            <button key={id} ref={(el) => (btnRefs.current[id] = el)} onClick={() => go(id)} style={{ position: "relative", zIndex: 1, flexShrink: 0, border: "none", background: "transparent", color: on ? "#fff" : C.muted, fontSize: 13, fontWeight: 700, padding: "8px 15px", borderRadius: 999, cursor: "pointer", whiteSpace: "nowrap", transition: "color .2s" }}>{l}</button>
+          ); })}
         </div>
       </div>
     </div>
@@ -830,15 +896,19 @@ function CompareApp() {
     try {
       const [c, p, k] = (window.location.hash.replace("#", "").split("/"));
       if (c && CATS[c]) { setCat(c); if (p && PRODUCTS[p] && PRODUCTS[p].cat.includes(c)) { setProdKey(p); if (k && PRODUCTS[p].comps[k]) setCompSlug(k); } }
-    } catch { }
+    } catch {}
   }, []);
-  useEffect(() => { try { window.location.hash = [cat, prodKey, compSlug].filter(Boolean).join("/"); } catch { } }, [cat, prodKey, compSlug]);
+  useEffect(() => { try { window.location.hash = [cat, prodKey, compSlug].filter(Boolean).join("/"); } catch {} }, [cat, prodKey, compSlug]);
 
   const chooseCat = (c) => { setCat(c); setProdKey(null); setCompSlug(null); };
-  const reset = () => { setCat(null); setProdKey(null); setCompSlug(null); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch { } };
+  const reset = () => { setCat(null); setProdKey(null); setCompSlug(null); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {} };
   const chooseProd = (p) => { setProdKey(p); setCompSlug(null); setTimeout(() => document.getElementById("choose-comp")?.scrollIntoView({ behavior: "smooth" }), 60); };
 
   const prod = prodKey ? PRODUCTS[prodKey] : null;
+  const [invMode, setInvMode] = useState(() => (new Date() >= new Date("2026-10-01") ? "after" : "before"));
+  const effProd = (prod && prodKey === "invoice" && prod.petpooja.pricing.plansAfter)
+    ? { ...prod, petpooja: { ...prod.petpooja, pricing: { ...prod.petpooja.pricing, plans: invMode === "after" ? prod.petpooja.pricing.plansAfter : prod.petpooja.pricing.plans } } }
+    : prod;
   const comp = prod && compSlug ? prod.comps[compSlug] : null;
   const pName = prod ? prod.name : "";
 
@@ -846,11 +916,11 @@ function CompareApp() {
   const [cpPlanId, setCpPlanId] = useState(null);
   useEffect(() => { setPpPlanId(prod ? defPlanId(prod.petpooja.pricing) : null); }, [prodKey]);
   useEffect(() => { setCpPlanId(comp ? defPlanId(comp.pricing) : null); }, [prodKey, compSlug]);
-  const ppPlan = prod ? getPlanById(prod.petpooja.pricing, ppPlanId) : null;
+  const ppPlan = effProd ? getPlanById(effProd.petpooja.pricing, ppPlanId) : null;
   const compPlan = comp ? getPlanById(comp.pricing, cpPlanId) : null;
 
-  const share = () => { try { window.open(`https://wa.me/?text=${encodeURIComponent(`Compare Petpooja ${pName} vs ${comp.name} ` + window.location.href)}`, "_blank"); } catch { } };
-  const copy = () => { try { navigator.clipboard.writeText(window.location.href); } catch { } };
+  const share = () => { try { window.open(`https://wa.me/?text=${encodeURIComponent(`Compare Petpooja ${pName} vs ${comp.name} ` + window.location.href)}`, "_blank"); } catch {} };
+  const copy = () => { try { navigator.clipboard.writeText(window.location.href); } catch {} };
 
   return (
     <div id="top" style={{ background: C.bg, minHeight: "100vh", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", color: C.dark }}>
@@ -906,6 +976,14 @@ function CompareApp() {
       {/* COMPARISON */}
       {prod && comp && (
         <div key={prodKey + compSlug} className="pc-swap">
+          {prodKey === "invoice" && (
+            <div className="pc-no-print" style={{ ...container, padding: "12px 20px 0", display: "flex", justifyContent: "center" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: C.card, border: `1px solid ${C.border}`, borderRadius: 999, padding: "6px 8px 6px 14px", boxShadow: "0 4px 16px rgba(16,24,40,.06)" }}>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: C.muted }}>Invoice plans:</span>
+                {[["before", "Before 1 Oct 2026"], ["after", "From 1 Oct 2026"]].map(([v, l]) => <button key={v} onClick={() => setInvMode(v)} style={{ border: "none", cursor: "pointer", borderRadius: 999, padding: "7px 14px", fontSize: 12.5, fontWeight: 800, background: invMode === v ? C.red : "transparent", color: invMode === v ? "#fff" : C.dark }}>{l}</button>)}
+              </div>
+            </div>
+          )}
           <JumpNav prod={prod} />
           <Block><div id="cmp"><SectionHead kicker="Head to head" title={`Petpooja ${pName} vs ${comp.name}`} sub="Petpooja stays on the left. Everything below updates for your selection." />
             <div className="pc-two" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 16, alignItems: "center" }}>
@@ -915,13 +993,13 @@ function CompareApp() {
             </div>
           </div></Block>
 
-          <Block><SectionHead kicker="Pricing" title="Pricing comparison" sub="Compare the real pricing model, not just the starting price." /><Pricing prod={prod} comp={comp} pName={pName} ppPlan={ppPlan} setPpPlan={setPpPlanId} compPlan={compPlan} setCompPlan={setCpPlanId} /></Block>
-          <Block id="calculator"><Calculator prod={prod} comp={comp} pName={pName} ppPlan={ppPlan} compPlan={compPlan} /></Block>
-          <Block><SectionHead kicker="Features" title="Feature comparison" sub="Tap a category to expand. First two are open by default." /><Features prod={prod} comp={comp} /></Block>
-          {prod.hardware && <Block id="hardware"><SectionHead kicker="Hardware" title="Hardware comparison" sub="Devices, printers and installation — shown only where hardware is relevant." /><Hardware prod={prod} comp={comp} /></Block>}
-          {prod.integrations && <Block id="integrations"><SectionHead kicker="Integrations" title="Payment & Tally integrations" sub="EDC machines, Android POS, dynamic QR and Tally — available with Petpooja Invoice." /><Integrations data={prod.integrations} /></Block>}
-          <Block id="advantages"><SectionHead kicker="Advantages" title="Where each stands out" /><Advantages prod={prod} comp={comp} /></Block>
-          <Block id="summary"><SectionHead kicker="Summary" title="Comparison summary" sub="A transparent tally — where Petpooja leads, where they're similar, and where the competitor leads." /><Summary prod={prod} comp={comp} /></Block>
+          <Block><SectionHead kicker="Pricing" title="Pricing comparison" sub="Compare the real pricing model, not just the starting price." /><Pricing prod={effProd} comp={comp} pName={pName} ppPlan={ppPlan} setPpPlan={setPpPlanId} compPlan={compPlan} setCompPlan={setCpPlanId} /></Block>
+          <Block id="calculator"><Calculator prod={effProd} comp={comp} pName={pName} ppPlan={ppPlan} compPlan={compPlan} /></Block>
+          <Block><SectionHead kicker="Features" title="Feature comparison" sub="Tap a category to expand. First two are open by default." /><Features prod={effProd} comp={comp} /></Block>
+          {effProd.hardware && <Block id="hardware"><SectionHead kicker="Hardware" title="Hardware comparison" sub="Devices, printers and installation — shown only where hardware is relevant." /><Hardware prod={effProd} comp={comp} /></Block>}
+          {effProd.integrations && <Block id="integrations"><SectionHead kicker="Integrations" title="Payment & Tally integrations" sub="EDC machines, Android POS, dynamic QR and Tally — available with Petpooja Invoice." /><Integrations data={effProd.integrations} /></Block>}
+          <Block id="advantages"><SectionHead kicker="Advantages" title="Where each stands out" /><Advantages prod={effProd} comp={comp} /></Block>
+          <Block id="summary"><SectionHead kicker="Summary" title="Comparison summary" sub="A transparent tally — where Petpooja leads, where they're similar, and where the competitor leads." /><Summary prod={effProd} comp={comp} /></Block>
           <Block><div id="sources"><SectionHead kicker="Transparency" title="Data sources" /><Sources prod={prod} comp={comp} /></div></Block>
 
           <section className="pc-no-print" style={{ padding: "6px 20px 40px" }}>
@@ -1004,16 +1082,27 @@ button:active{transform:translateY(1px) scale(.995);}
   .pc-calc-in,.pc-calc-out{grid-template-columns:1fr !important;}
   h1{font-size:32px !important;}
 }
-@media print{.pc-no-print{display:none !important;}.pc-reveal{opacity:1 !important;transform:none !important;}body{background:#fff;}}\n`;
-
-/* ============================================================================
-   AUTH LAYER - login (email + auto password) + admin, around CompareApp.
-   Preview auth/data are in-memory. Password is derived from the email:
-   vikas.rajpurohit@petpooja.com -> vik.r@123 ; vikas.rajpurohit1@... -> vik.r1@123
+@media print{
+  .pc-no-print{display:none !important;}
+  .pc-reveal{opacity:1 !important;transform:none !important;}
+  .pc-swap{animation:none !important;opacity:1 !important;transform:none !important;}
+  .pc-glow,.pc-authbg,.pc-float,.pc-float2,.pc-primary::after{animation:none !important;}
+  header, .pc-jump{position:static !important;top:auto !important;backdrop-filter:none !important;}
+  #top{min-height:0 !important;background:#fff !important;}
+  body{background:#fff !important;}
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  section{break-inside:auto;}
+  .pc-two > div, .pc-three > div{break-inside:avoid;}
+  @page{margin:12mm;size:auto;}
+}\n`;/* ============================================================================
+   AUTH LAYER (Neon via /api serverless functions). Roles + permanent DB.
+   Super Admin (custom pw) manages admins + super admins + employees.
+   Admin (custom pw) manages employees. Employee pw derived from email.
    ========================================================================== */
 const LOGO = "data:image/png;base64,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";
 function Logo({ size = 28, light = false }) { return <img src={LOGO} alt="Petpooja" style={{ height: size, width: "auto", display: "block", filter: light ? "brightness(0) invert(1)" : "none" }} />; }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const CONTACT = "karan.raval@petpooja.com";
+const API = async (path, body) => { const r = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); return r.json(); };
 const genPassword = (email) => {
   const local = String(email).split("@")[0].toLowerCase().trim();
   const parts = local.split(".");
@@ -1023,69 +1112,14 @@ const genPassword = (email) => {
   const digits = (secondRaw.match(/\d+$/) || [""])[0];
   return `${first}.${secondLetter}${digits}@123`;
 };
-const CONTACT = "karan.raval@petpooja.com";
-const store = {
-  admins: new Set(["karan.raval@petpooja.com"]),
-  allowed: new Set(["karan.raval@petpooja.com", "vikas.rajpurohit@petpooja.com"]),
-  addedBy: { "karan.raval@petpooja.com": "seed", "vikas.rajpurohit@petpooja.com": "karan.raval@petpooja.com" },
-  addedAt: { "karan.raval@petpooja.com": Date.now(), "vikas.rajpurohit@petpooja.com": Date.now() },
-  usage: {},
-  isAllowed(e) { return this.allowed.has(e); }, isAdmin(e) { return this.admins.has(e); },
-  logOpen(e) { const u = this.usage[e] || { opens: 0, last: 0 }; this.usage[e] = { opens: u.opens + 1, last: Date.now() }; },
-  add(e, by) { e = e.trim().toLowerCase(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return false; this.allowed.add(e); this.addedBy[e] = by; this.addedAt[e] = Date.now(); return true; },
-  remove(e) { this.allowed.delete(e); },
-  getAllowed() { return Array.from(this.allowed).map((email) => ({ email, addedBy: this.addedBy[email] || "-", pass: genPassword(email) })).sort((a, b) => (this.addedAt[b.email] || 0) - (this.addedAt[a.email] || 0)); },
-  getUsage() { return Object.entries(this.usage).map(([email, v]) => ({ email, opens: v.opens, last: v.last })).sort((a, b) => b.opens - a.opens); },
-};
 const auth = {
   async signIn(email, password) {
     const em = email.trim().toLowerCase();
-
-    if (!em || !password) {
-      return {
-        ok: false,
-        error: "Please enter email and password.",
-      };
-    }
-
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email: em,
-        password,
-      });
-
-    if (error) {
-      return {
-        ok: false,
-        error: error.message,
-      };
-    }
-
-    const user = data.user;
-
-    await supabase
-      .from("profiles")
-      .upsert({
-        id: user.id,
-        email: user.email,
-        last_login_at: new Date().toISOString(),
-      });
-
-    return {
-      ok: true,
-      admin: false,
-      user,
-    };
-  },
-
-  async signOut() {
-    await supabase.auth.signOut();
-  },
-
-  async getSession() {
-    const { data } = await supabase.auth.getSession();
-
-    return data.session;
+    try {
+      const data = await API("/api/login", { email: em, password });
+      if (!data || !data.ok) return { ok: false, error: (data && data.reason === "bad_password") ? ("Incorrect password. Please contact " + CONTACT) : ("This email isn't enabled for login. Please contact " + CONTACT) };
+      return { ok: true, role: data.role };
+    } catch (e) { return { ok: false, error: "Network error. Please try again." }; }
   },
 };
 const AUTH_CSS = `
@@ -1102,7 +1136,7 @@ const AUTH_CSS = `
 @keyframes pcup{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 button{transition:transform .12s ease, box-shadow .2s ease;} button:active{transform:translateY(1px);}
 @media(max-width:820px){ .pc-login{grid-template-columns:1fr!important;} .pc-brandpanel{display:none!important;} .pc-brandmobile{display:flex!important;} }
-@media(max-width:760px){ .pc-three{grid-template-columns:1fr!important;} .pc-hide-sm{display:none!important;} }
+@media(max-width:760px){ .pc-two{grid-template-columns:1fr!important;} .pc-three{grid-template-columns:1fr!important;} .pc-hide-sm{display:none!important;} }
 `;
 function Login({ onAuthed }) {
   const [email, setEmail] = useState(""), [pw, setPw] = useState(""), [show, setShow] = useState(false), [busy, setBusy] = useState(false), [err, setErr] = useState("");
@@ -1111,7 +1145,7 @@ function Login({ onAuthed }) {
     setErr(""); setBusy(true);
     const r = await auth.signIn(email, pw); setBusy(false);
     if (!r.ok) { setErr(r.error); return; }
-    onAuthed({ email: email.trim().toLowerCase(), admin: r.admin });
+    onAuthed({ email: email.trim().toLowerCase(), role: r.role, password: pw });
   };
   const input = { width: "100%", padding: "14px 14px 14px 44px", fontSize: 15, border: `1.5px solid ${C.border}`, borderRadius: 12, outline: "none", boxSizing: "border-box" };
   const btn = { width: "100%", padding: 14, fontSize: 15, fontWeight: 700, color: "#fff", background: C.red, border: "none", borderRadius: 12, cursor: busy ? "default" : "pointer", opacity: busy ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 8px 20px rgba(229,57,53,.22)" };
@@ -1142,8 +1176,13 @@ function Login({ onAuthed }) {
             <button style={btn} onClick={submit} disabled={busy}>{busy ? <><Loader2 size={17} className="pc-spin" /> Signing in...</> : <>Sign in <ArrowRight size={17} /></>}</button>
             {err && <div style={{ color: C.red, fontSize: 13, marginTop: 16, background: C.redSoft, padding: "10px 12px", borderRadius: 10, lineHeight: 1.5 }}>{err}</div>}
           </div>
-          <div style={{ marginTop: 26, paddingTop: 18, borderTop: `1px solid ${C.border}`, fontSize: 12.5, color: C.muted }}>
-            <div style={{ display: "flex", gap: 7, alignItems: "flex-start" }}><ShieldCheck size={15} style={{ color: C.green, flexShrink: 0, marginTop: 1 }} /><span>Don't have access? For login, contact <a href={"mailto:" + CONTACT} style={{ color: C.red, fontWeight: 700, textDecoration: "none" }}>{CONTACT}</a></span></div>
+          <div style={{ marginTop: 22, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "13px 14px", fontSize: 12.5, color: C.muted, lineHeight: 1.55 }}>
+            <div style={{ fontWeight: 800, color: C.dark, fontSize: 12.5, marginBottom: 6, display: "inline-flex", alignItems: "center", gap: 6 }}><ShieldCheck size={14} style={{ color: C.green }} /> How to sign in</div>
+            <div><b style={{ color: C.dark }}>Email:</b> your Petpooja work email (e.g. name.surname@petpooja.com).</div>
+            <div><b style={{ color: C.dark }}>Password:</b> first 3 letters of your first name + <b>.</b> + first letter of your surname + <b>@123</b>. Example: <code style={{ background: C.card, padding: "1px 6px", borderRadius: 6, color: C.dark }}>vikas.rajpurohit</code> &rarr; <code style={{ background: C.card, padding: "1px 6px", borderRadius: 6, color: C.dark }}>vik.r@123</code>. Admins use the password shared with them.</div>
+          </div>
+          <div style={{ marginTop: 12, paddingTop: 14, borderTop: `1px solid ${C.border}`, fontSize: 12.5, color: C.muted }}>
+            <div style={{ display: "flex", gap: 7, alignItems: "flex-start" }}><Mail size={14} style={{ color: C.red, flexShrink: 0, marginTop: 1 }} /><span>Not on the list? For access, contact <a href={"mailto:" + CONTACT} style={{ color: C.red, fontWeight: 700, textDecoration: "none" }}>{CONTACT}</a></span></div>
           </div>
         </div>
       </div>
@@ -1151,80 +1190,177 @@ function Login({ onAuthed }) {
   );
 }
 function AdminHeader({ user, logout, onBack }) {
+  const label = user.role === "superadmin" ? "Super Admin" : "Admin";
   return <header style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(255,255,255,.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${C.border}`, padding: "11px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={26} /><span style={{ fontWeight: 800, fontSize: 16.5 }}>Compare <span style={{ color: C.muted, fontWeight: 600 }}>Admin</span></span></div>
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Logo size={26} /><span style={{ fontWeight: 800, fontSize: 16.5 }}>Compare <span style={{ color: C.muted, fontWeight: 600 }}>{label}</span></span></div>
     <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}><button onClick={onBack} style={{ border: "none", background: "none", color: C.red, fontWeight: 700, cursor: "pointer" }}>&#8592; Site</button><span style={{ color: C.muted }} className="pc-hide-sm">{user.email}</span><button onClick={logout} style={{ border: `1px solid ${C.border}`, background: "#fff", borderRadius: 999, padding: "6px 12px", fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}><LogOut size={14} /> Log out</button></div>
   </header>;
 }
 function Admin({ user, logout, onBack }) {
-  const [, tick] = useState(0); const refresh = () => tick((n) => n + 1);
-  const [newEmail, setNewEmail] = useState(""), [bulk, setBulk] = useState(""), [msg, setMsg] = useState(""), [copied, setCopied] = useState("");
-  const allowed = store.getAllowed(), usage = store.getUsage(), totalOpens = usage.reduce((s, u) => s + u.opens, 0);
-  const addOne = () => { if (!store.add(newEmail, user.email)) { setMsg("Enter a valid email."); return; } setNewEmail(""); setMsg("Added " + newEmail.trim().toLowerCase()); refresh(); };
-  const addBulk = () => { const list = bulk.split(/[\s,;]+/).map((x) => x.trim().toLowerCase()).filter(Boolean); let ok = 0; list.forEach((e) => { if (store.add(e, user.email)) ok++; }); setBulk(""); setMsg("Added " + ok + " email" + (ok === 1 ? "" : "s") + (ok < list.length ? " (" + (list.length - ok) + " invalid skipped)" : "")); refresh(); };
-  const remove = (e) => { if (e === user.email) { setMsg("You can't remove yourself."); return; } store.remove(e); refresh(); };
-  const copy = (p) => { try { navigator.clipboard.writeText(p); setCopied(p); setTimeout(() => setCopied(""), 1200); } catch { } };
+  const isSuper = user.role === "superadmin";
+  const [employees, setEmployees] = useState([]), [staff, setStaff] = useState([]), [usage, setUsage] = useState([]), [feedback, setFeedback] = useState([]), [loading, setLoading] = useState(true);
+  const [newEmail, setNewEmail] = useState(""), [bulk, setBulk] = useState(""), [bulkMode, setBulkMode] = useState("add"), [msg, setMsg] = useState(""), [copied, setCopied] = useState("");
+  const [sEmail, setSEmail] = useState(""), [sPass, setSPass] = useState(""), [sRole, setSRole] = useState("admin"), [sMsg, setSMsg] = useState("");
+  const api = (action, extra) => API("/api/admin", { action, adminEmail: user.email, adminPassword: user.password, ...(extra || {}) });
+  const load = async () => {
+    setLoading(true);
+    const calls = [api("list_employees"), api("usage")];
+    if (isSuper) calls.push(api("list_staff"));
+    const res = await Promise.all(calls);
+    setEmployees(res[0].data || []); setUsage(res[1].data || []); if (isSuper) setStaff(res[2].data || []);
+    const fb = await api("feedback"); setFeedback(fb.data || []);
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+  const addEmployees = async (list) => {
+    const clean = list.map((x) => x.trim().toLowerCase()).filter(Boolean);
+    if (!clean.length) { setMsg("No emails to add."); return; }
+    const r = await api("add_employees", { emails: clean });
+    if (r.error) { setMsg("Error: " + r.error); return; }
+    setMsg("Added " + (r.count || 0) + " employee" + ((r.count || 0) === 1 ? "" : "s")); load();
+  };
+  const addOne = async () => { await addEmployees([newEmail]); setNewEmail(""); };
+    const removeEmployees = async (list) => {
+    const clean = list.map((x) => x.trim().toLowerCase()).filter(Boolean);
+    if (!clean.length) { setMsg("No emails to remove."); return; }
+    const r = await api("remove_employees", { emails: clean });
+    if (r.error) { setMsg("Error: " + r.error); return; }
+    setMsg("Removed " + (r.count || 0) + " employee" + ((r.count || 0) === 1 ? "" : "s")); load();
+  };
+  const runBulk = async () => { const list = bulk.split(/[\s,;]+/); if (bulkMode === "add") await addEmployees(list); else await removeEmployees(list); setBulk(""); };
+  const removeEmp = async (e) => { await api("remove_employee", { target: e }); load(); };
+  const addStaff = async () => {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(sEmail)) { setSMsg("Enter a valid email."); return; }
+    if (sPass.trim().length < 4) { setSMsg("Password must be at least 4 characters."); return; }
+    const r = await api("add_staff", { newEmail: sEmail, newPassword: sPass, role: sRole });
+    if (r.error || r.ok === false) { setSMsg("Error: " + (r.error || "failed")); return; }
+    setSMsg("Saved " + sEmail.trim().toLowerCase() + " as " + (sRole === "superadmin" ? "Super Admin" : "Admin")); setSEmail(""); setSPass(""); load();
+  };
+  const removeStaff = async (e) => { if (e === user.email) { setSMsg("You can't remove yourself."); return; } await api("remove_staff", { target: e }); load(); };
+  const copy = (p) => { try { navigator.clipboard.writeText(p); setCopied(p); setTimeout(() => setCopied(""), 1200); } catch {} };
   const card = { background: C.card, border: `1px solid ${C.border}`, borderRadius: 18, padding: 22, boxShadow: "0 4px 20px rgba(16,24,40,.05)" };
   const input = { padding: "12px 14px", fontSize: 15, border: `1.5px solid ${C.border}`, borderRadius: 12, outline: "none", boxSizing: "border-box" };
   const addBtn = { padding: "12px 18px", fontSize: 14.5, fontWeight: 700, color: "#fff", background: C.red, border: "none", borderRadius: 12, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 7 };
+  const totalOpens = usage.reduce((s, u) => s + Number(u.opens), 0);
+  const roleBadge = (role) => role === "superadmin"
+    ? <span style={{ fontSize: 10, fontWeight: 800, color: "#7A5B00", background: "#FFF3CC", padding: "2px 7px", borderRadius: 999, display: "inline-flex", alignItems: "center", gap: 3 }}><Crown size={11} /> SUPER</span>
+    : <span style={{ fontSize: 10, fontWeight: 800, color: C.red, background: C.redSoft, padding: "2px 7px", borderRadius: 999 }}>ADMIN</span>;
   return <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "Inter, -apple-system, system-ui, sans-serif", color: C.dark }}><style>{AUTH_CSS}</style>
     <AdminHeader user={user} logout={logout} onBack={onBack} />
     <div style={{ maxWidth: 940, margin: "0 auto", padding: "26px 20px 60px" }}>
-      <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.02em", margin: "0 0 4px" }}>Admin portal</h1>
-      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 22px" }}>Add who can log in - each person's password is auto-generated from their email. Share it with them.</p>
+      <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.02em", margin: "0 0 4px" }}>{isSuper ? "Super Admin portal" : "Admin portal"}</h1>
+      <p style={{ color: C.muted, fontSize: 14, margin: "0 0 22px" }}>{isSuper ? "Manage employees, admins and super admins - all saved in the database." : "Add employees who can log in - saved in the database."}</p>
       <div className="pc-three" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 20 }}>
-        {[["Allowed users", allowed.length, ShieldCheck], ["Active users", usage.length, Users], ["Total opens", totalOpens, Activity]].map(([l, v, Ic]) => <div key={l} style={card}><div style={{ display: "flex", alignItems: "center", gap: 8, color: C.muted, fontSize: 13, fontWeight: 600 }}><Ic size={15} /> {l}</div><div style={{ fontSize: 30, fontWeight: 800, marginTop: 6 }}>{v}</div></div>)}
+        {[["Employees", employees.length, ShieldCheck], ["Active users", usage.length, Users], ["Total opens", totalOpens, Activity]].map(([l, v, Ic]) => <div key={l} style={card}><div style={{ display: "flex", alignItems: "center", gap: 8, color: C.muted, fontSize: 13, fontWeight: 600 }}><Ic size={15} /> {l}</div><div style={{ fontSize: 30, fontWeight: 800, marginTop: 6 }}>{v}</div></div>)}
       </div>
+      {isSuper && <div style={{ ...card, marginBottom: 20, border: "1.5px solid #FFE49B", background: "#FFFCF3" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}><Crown size={17} style={{ color: "#B8860B" }} /> Team access (admins & super admins)</div>
+        <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>These logins use a custom password you set here (not the auto rule).</div>
+        <div className="pc-two" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr auto auto", gap: 10, alignItems: "center" }}>
+          <input style={input} placeholder="name.surname@petpooja.com" value={sEmail} onChange={(e) => setSEmail(e.target.value)} />
+          <input style={input} placeholder="Set a password" value={sPass} onChange={(e) => setSPass(e.target.value)} />
+          <select value={sRole} onChange={(e) => setSRole(e.target.value)} style={{ ...input, cursor: "pointer" }}><option value="admin">Admin</option><option value="superadmin">Super Admin</option></select>
+          <button onClick={addStaff} style={addBtn}><UserPlus size={16} /> Add</button>
+        </div>
+        {sMsg && <div style={{ fontSize: 13, color: sMsg.startsWith("Saved") ? "#0B7A48" : C.red, marginTop: 10 }}>{sMsg}</div>}
+        <div style={{ marginTop: 16 }}>
+          {staff.map((a) => <div key={a.email} style={{ display: "grid", gridTemplateColumns: "1fr 160px 90px", padding: "10px 0", borderTop: `1px solid ${C.border}`, alignItems: "center", gap: 8 }}>
+            <div><span style={{ fontSize: 14, fontWeight: 600 }}>{a.email}</span> {roleBadge(a.role)}<div style={{ fontSize: 11.5, color: C.muted }}>added by {a.added_by || "-"}</div></div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><code style={{ fontSize: 13, fontWeight: 700, color: C.dark, background: C.bg, padding: "4px 8px", borderRadius: 7 }}>{a.password}</code><button onClick={() => copy(a.password)} style={{ border: "none", background: "transparent", color: copied === a.password ? C.green : C.muted, cursor: "pointer", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Copy size={13} /> {copied === a.password ? "Copied" : ""}</button></div>
+            <div style={{ textAlign: "right" }}>{a.email !== user.email && <button onClick={() => removeStaff(a.email)} style={{ border: `1px solid ${C.border}`, background: "#fff", color: C.red, borderRadius: 999, padding: "5px 11px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}><Trash2 size={13} /> Remove</button>}</div>
+          </div>)}
+        </div>
+      </div>}
       <div className="pc-two" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
         <div style={card}>
-          <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}>Add a single email</div>
-          <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Password is generated automatically.</div>
+          <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}>Add an employee</div>
+          <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Saved to the database. Password auto-generated.</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}><input style={{ ...input, flex: 1, minWidth: 180 }} placeholder="name.surname@petpooja.com" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addOne()} /><button onClick={addOne} style={addBtn}><UserPlus size={16} /> Add</button></div>
           {newEmail.includes("@") && <div style={{ marginTop: 10, fontSize: 12.5, color: C.muted }}>Password will be: <b style={{ color: C.dark, fontFamily: "monospace" }}>{genPassword(newEmail)}</b></div>}
         </div>
         <div style={card}>
-          <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}>Bulk add (paste from Excel)</div>
-          <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>One email per line, or comma-separated.</div>
+          <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}>Bulk add / remove (paste from Excel)</div>
+          <div style={{ fontSize: 13, color: C.muted, marginBottom: 12 }}>Pick an action, paste emails (one per line or comma-separated).</div>
+          <div style={{ display: "inline-flex", gap: 4, background: C.bg, borderRadius: 10, padding: 4, marginBottom: 10 }}>
+            {[["add", "Add", UserPlus], ["remove", "Remove", Trash2]].map(([v, l, Ic]) => <button key={v} onClick={() => setBulkMode(v)} style={{ border: "none", cursor: "pointer", borderRadius: 8, padding: "7px 15px", fontSize: 13, fontWeight: 800, background: bulkMode === v ? C.red : "transparent", color: bulkMode === v ? "#fff" : C.muted, display: "inline-flex", alignItems: "center", gap: 6 }}><Ic size={14} /> {l}</button>)}
+          </div>
           <textarea style={{ ...input, width: "100%", height: 76, resize: "vertical", fontFamily: "inherit" }} placeholder={"a.sharma@petpooja.com\nb.verma@petpooja.com"} value={bulk} onChange={(e) => setBulk(e.target.value)} />
-          <button onClick={addBulk} style={{ ...addBtn, marginTop: 10 }}><UserPlus size={16} /> Add all</button>
+          <button onClick={runBulk} style={{ ...addBtn, marginTop: 10 }}>{bulkMode === "remove" ? <><Trash2 size={16} /> Remove all</> : <><UserPlus size={16} /> Add all</>}</button>
         </div>
       </div>
       {msg && <div style={{ fontSize: 13, color: msg.startsWith("Added") ? "#0B7A48" : C.red, margin: "0 0 16px" }}>{msg}</div>}
       <div style={{ ...card, marginBottom: 20 }}>
-        <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 12 }}>Allowed users & passwords</div>
+        <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 12 }}>Employees & passwords {loading && <span style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>- loading...</span>}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 160px 90px", padding: "9px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: ".04em" }}><span>Email</span><span>Password</span><span></span></div>
-        {allowed.map((a) => <div key={a.email} style={{ display: "grid", gridTemplateColumns: "1fr 160px 90px", padding: "11px 0", borderBottom: `1px solid ${C.border}`, alignItems: "center", gap: 8 }}>
-          <div><span style={{ fontSize: 14, fontWeight: 600 }}>{a.email}</span> {store.isAdmin(a.email) && <span style={{ fontSize: 10, fontWeight: 800, color: C.red, background: C.redSoft, padding: "2px 7px", borderRadius: 999 }}>ADMIN</span>}<div style={{ fontSize: 11.5, color: C.muted }}>added by {a.addedBy}</div></div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><code style={{ fontSize: 13, fontWeight: 700, color: C.dark, background: C.bg, padding: "4px 8px", borderRadius: 7 }}>{a.pass}</code><button onClick={() => copy(a.pass)} title="Copy" style={{ border: "none", background: "transparent", color: copied === a.pass ? C.green : C.muted, cursor: "pointer", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Copy size={13} /> {copied === a.pass ? "Copied" : ""}</button></div>
-          <div style={{ textAlign: "right" }}><button onClick={() => remove(a.email)} style={{ border: `1px solid ${C.border}`, background: "#fff", color: C.red, borderRadius: 999, padding: "5px 11px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}><Trash2 size={13} /> Remove</button></div>
+        {employees.map((a) => <div key={a.email} style={{ display: "grid", gridTemplateColumns: "1fr 160px 90px", padding: "11px 0", borderBottom: `1px solid ${C.border}`, alignItems: "center", gap: 8 }}>
+          <div><span style={{ fontSize: 14, fontWeight: 600 }}>{a.email}</span><div style={{ fontSize: 11.5, color: C.muted }}>added by {a.added_by || "-"}</div></div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><code style={{ fontSize: 13, fontWeight: 700, color: C.dark, background: C.bg, padding: "4px 8px", borderRadius: 7 }}>{genPassword(a.email)}</code><button onClick={() => copy(genPassword(a.email))} style={{ border: "none", background: "transparent", color: copied === genPassword(a.email) ? C.green : C.muted, cursor: "pointer", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }}><Copy size={13} /> {copied === genPassword(a.email) ? "Copied" : ""}</button></div>
+          <div style={{ textAlign: "right" }}><button onClick={() => removeEmp(a.email)} style={{ border: `1px solid ${C.border}`, background: "#fff", color: C.red, borderRadius: 999, padding: "5px 11px", fontSize: 12.5, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}><Trash2 size={13} /> Remove</button></div>
         </div>)}
+        {!loading && employees.length === 0 && <div style={{ color: C.muted, fontSize: 13, padding: "12px 0" }}>No employees yet - add one above.</div>}
       </div>
       <div style={card}>
         <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}>Usage - logins / opens per user</div>
-        <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Counts every time a user opens or logs into the site.</div>
+        <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Counts every login. Stored in the database.</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 150px", padding: "10px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12.5, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: ".04em" }}><span>User</span><span style={{ textAlign: "right" }}>Opens</span><span style={{ textAlign: "right" }}>Last seen</span></div>
         {usage.length === 0 && <div style={{ color: C.muted, fontSize: 13, padding: "12px 0" }}>No activity yet.</div>}
-        {usage.map((u) => <div key={u.email} style={{ display: "grid", gridTemplateColumns: "1fr 90px 150px", padding: "11px 0", borderBottom: `1px solid ${C.border}`, alignItems: "center" }}><span style={{ fontSize: 14 }}>{u.email}</span><span style={{ textAlign: "right", fontWeight: 800 }}>{u.opens}</span><span style={{ textAlign: "right", fontSize: 13, color: C.muted }}>{u.last ? new Date(u.last).toLocaleTimeString() : "-"}</span></div>)}
+        {usage.map((u) => <div key={u.email} style={{ display: "grid", gridTemplateColumns: "1fr 90px 150px", padding: "11px 0", borderBottom: `1px solid ${C.border}`, alignItems: "center" }}><span style={{ fontSize: 14 }}>{u.email}</span><span style={{ textAlign: "right", fontWeight: 800 }}>{u.opens}</span><span style={{ textAlign: "right", fontSize: 13, color: C.muted }}>{u.last_seen ? new Date(u.last_seen).toLocaleString() : "-"}</span></div>)}
+      </div>
+      <div style={{ ...card, marginTop: 20 }}>
+        <div style={{ fontWeight: 800, fontSize: 15.5, marginBottom: 3 }}>Feedback from users</div>
+        <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Submitted via the Feedback button on the site.</div>
+        {feedback.length === 0 && <div style={{ color: C.muted, fontSize: 13, padding: "6px 0" }}>No feedback yet.</div>}
+        {feedback.map((fb, i) => <div key={i} style={{ padding: "11px 0", borderBottom: `1px solid ${C.border}` }}><div style={{ fontSize: 14, color: C.dark }}>{fb.message}</div><div style={{ fontSize: 11.5, color: C.muted, marginTop: 3 }}>{fb.email || "anonymous"} · {fb.created_at ? new Date(fb.created_at).toLocaleString() : ""}</div></div>)}
       </div>
     </div>
   </div>;
 }
 function LoggedInBar({ user, logout, onAdmin }) {
-  return <div style={{ background: C.dark, color: "#fff", padding: "7px 20px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 14, fontSize: 13, fontFamily: "Inter, system-ui, sans-serif" }}>
+  return <div className="pc-no-print" style={{ background: C.dark, color: "#fff", padding: "7px 20px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 14, fontSize: 13, fontFamily: "Inter, system-ui, sans-serif" }}>
     <span style={{ color: "#9aa5b1" }}>Signed in</span><span style={{ fontWeight: 600 }} className="pc-hide-sm">{user.email}</span>
-    {onAdmin && <button onClick={onAdmin} style={{ border: "none", background: "rgba(255,255,255,.14)", color: "#fff", borderRadius: 999, padding: "4px 12px", fontWeight: 700, cursor: "pointer", fontSize: 12.5 }}>Admin</button>}
+    {onAdmin && <button onClick={onAdmin} style={{ border: "none", background: "rgba(255,255,255,.14)", color: "#fff", borderRadius: 999, padding: "4px 12px", fontWeight: 700, cursor: "pointer", fontSize: 12.5 }}>{user.role === "superadmin" ? "Super Admin" : "Admin"}</button>}
     <button onClick={logout} style={{ border: "none", background: C.red, color: "#fff", borderRadius: 999, padding: "4px 12px", fontWeight: 700, cursor: "pointer", fontSize: 12.5, display: "inline-flex", alignItems: "center", gap: 5 }}><LogOut size={13} /> Log out</button>
   </div>;
 }
+
+function FeedbackWidget({ user }) {
+  const [open, setOpen] = useState(false), [text, setText] = useState(""), [sent, setSent] = useState(false), [busy, setBusy] = useState(false);
+  const submit = async () => {
+    if (text.trim().length < 3) return;
+    setBusy(true);
+    try { await API("/api/feedback", { email: user.email, message: text.trim() }); } catch (e) {}
+    setBusy(false); setSent(true); setText("");
+    setTimeout(() => { setSent(false); setOpen(false); }, 1500);
+  };
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="pc-no-print" style={{ position: "fixed", right: 20, bottom: 20, zIndex: 60, border: "none", background: C.red, color: "#fff", borderRadius: 999, padding: "12px 18px", fontSize: 14, fontWeight: 800, cursor: "pointer", boxShadow: "0 10px 26px rgba(229,57,53,.35)", display: "inline-flex", alignItems: "center", gap: 8 }}>Feedback</button>
+      {open && (
+        <div className="pc-no-print" onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(16,24,40,.45)", display: "grid", placeItems: "center", padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 440, background: C.card, borderRadius: 18, padding: 24, boxShadow: "0 24px 60px rgba(16,24,40,.3)", fontFamily: "Inter, system-ui, sans-serif" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.dark, marginBottom: 4 }}>Share your feedback</div>
+            <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>Tell us what to improve, a missing competitor, wrong pricing, or an idea.</div>
+            {sent ? <div style={{ color: "#0B7A48", fontWeight: 700, padding: "14px 0" }}>Thanks! Your feedback was sent.</div> : <>
+              <textarea autoFocus value={text} onChange={(e) => setText(e.target.value)} placeholder="Type your feedback..." style={{ width: "100%", height: 120, padding: 12, fontSize: 14, border: `1.5px solid ${C.border}`, borderRadius: 12, outline: "none", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+                <button onClick={() => setOpen(false)} style={{ border: `1px solid ${C.border}`, background: "#fff", color: C.dark, borderRadius: 10, padding: "10px 16px", fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+                <button onClick={submit} disabled={busy || text.trim().length < 3} style={{ border: "none", background: C.red, color: "#fff", borderRadius: 10, padding: "10px 18px", fontWeight: 700, cursor: "pointer", opacity: busy || text.trim().length < 3 ? 0.6 : 1 }}>{busy ? "Sending..." : "Send feedback"}</button>
+              </div>
+            </>}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function App() {
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("pc_user") || "null"); } catch { return null; }
-  });
+  const [user, setUser] = useState(() => { try { return JSON.parse(localStorage.getItem("pc_user") || "null"); } catch { return null; } });
   const [view, setView] = useState("dashboard");
   const isAdmin = user && (user.role === "admin" || user.role === "superadmin");
-  const login = (u) => { try { localStorage.setItem("pc_user", JSON.stringify(u)); } catch { } setUser(u); setView("dashboard"); };
-  const logout = () => { try { localStorage.removeItem("pc_user"); } catch { } setUser(null); };
+  const login = (u) => { try { localStorage.setItem("pc_user", JSON.stringify(u)); } catch {} setUser(u); setView("dashboard"); };
+  const logout = () => { try { localStorage.removeItem("pc_user"); } catch {} setUser(null); };
   if (!user) return <Login onAuthed={login} />;
   if (view === "admin" && isAdmin) return <Admin user={user} logout={logout} onBack={() => setView("dashboard")} />;
-  return <><LoggedInBar user={user} logout={logout} onAdmin={isAdmin ? () => setView("admin") : null} /><CompareApp /></>;
+  return <><LoggedInBar user={user} logout={logout} onAdmin={isAdmin ? () => setView("admin") : null} /><FeedbackWidget user={user} /><CompareApp /></>;
 }
